@@ -1,6 +1,8 @@
 FROM ubuntu:24.10
 
-ARG QT_VERSION=5.15.15
+
+ARG QT_VERSION=5.15
+ARG QT_VERSION_FULL=5.15.15
 ARG ANDROID_NDK_VERSION=25.1.8937393
 ARG ANDROID_SDK_VERSION=31
 ARG ANDROID_BUILD_TOOLS_VERSION=31.0.0
@@ -44,11 +46,11 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 # Download and extract Qt source
 RUN mkdir -p /opt/qt-src && \
     cd /opt/qt-src && \
-    wget https://download.qt.io/official_releases/qt/5.15/5.15.15/single/qt-everywhere-opensource-src-5.15.15.tar.xz && \
-    tar -xf qt-everywhere-opensource-src-5.15.15.tar.xz
+    wget https://download.qt.io/official_releases/qt/${QT_VERSION}/${QT_VERSION_FULL}/single/qt-everywhere-opensource-src-${QT_VERSION_FULL}.tar.xz && \
+    tar -xf qt-everywhere-opensource-src-${QT_VERSION_FULL}.tar.xz
 
 # Configure and build Qt
- RUN cd /opt/qt-src/qt-everywhere-src-5.15.15 && \
+ RUN cd /opt/qt-src/qt-everywhere-src-${QT_VERSION_FULL} && \
     ./configure \
     -xplatform android-clang \
     -disable-rpath \
@@ -64,11 +66,11 @@ RUN mkdir -p /opt/qt-src && \
     make install
 
 # Remove Qt sources
-RUN rm /opt/qt-src/qt-everywhere-opensource-src-5.15.15.tar.xz
+RUN rm /opt/qt-src/qt-everywhere-opensource-src-${QT_VERSION_FULL}.tar.xz
 
 # Add Qt to PATH
 ENV PATH=$QT_DIR/bin:$PATH
-ENV PATH="${QT_DIR}/${QT_VERSION}/android_armv7/bin/:${PATH}"
+ENV PATH="${QT_DIR}/${QT_VERSION_FULL}/android_armv7/bin/:${PATH}"
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
