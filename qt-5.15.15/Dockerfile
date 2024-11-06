@@ -52,11 +52,11 @@ RUN mkdir -p /opt/qt-src && \
 # Configure and build Qt
  RUN cd /opt/qt-src/qt-everywhere-src-${QT_VERSION_FULL} && \
     ./configure \
-    -xplatform android-clang \
+    -platform android-clang \
     -disable-rpath \
     -android-sdk ${ANDROID_SDK_ROOT} \
     -android-ndk ${ANDROID_NDK_ROOT} \
-    -prefix /opt/qt \
+    -prefix ${QT_DIR} \
     -opensource \
     -confirm-license \
     -nomake examples \
