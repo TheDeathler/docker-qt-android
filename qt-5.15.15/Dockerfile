@@ -6,10 +6,10 @@ ARG QT_VERSION_FULL=5.15.15
 ARG ANDROID_NDK_VERSION=25.1.8937393
 ARG ANDROID_SDK_VERSION=31
 ARG ANDROID_BUILD_TOOLS_VERSION=31.0.0
-ARG QT_DIR=/opt/qt
+ARG QT_PREFIX="/opt/qt"
 
 # Update the package list and install necessary packages
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     build-essential \
     coreutils \
     curl \
@@ -22,8 +22,15 @@ RUN apt-get update && apt-get install -y \
     make \
     cmake \
     unzip \
+    ninja-build \
     nano \
-    wget
+    wget \
+    llvm \
+    qt6-base-dev \
+    libclang-14-dev
+
+
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 RUN apt install -y -f \
     android-sdk \
@@ -39,7 +46,6 @@ RUN yes | sdkmanager --sdk_root=/usr/lib/android-sdk --licenses && \
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV ANDROID_NDK_ROOT=/opt/android-sdk/ndk/${ANDROID_NDK_VERSION}
 ENV ANDROID_SDK_VERSION=${ANDROID_SDK_VERSION}
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 # Download and extract Qt source
 RUN mkdir -p /opt/qt-src && \
@@ -49,12 +55,14 @@ RUN mkdir -p /opt/qt-src && \
 
 # Configure and build Qt
  RUN cd /opt/qt-src/qt-everywhere-src-${QT_VERSION_FULL} && \
-    ./configure \
-    -platform android-clang \
+    mkdir build && \
+    cd build && \
+    ../configure \
+    -xplatform android-clang \
     -disable-rpath \
     -android-sdk ${ANDROID_SDK_ROOT} \
     -android-ndk ${ANDROID_NDK_ROOT} \
-    -prefix ${QT_DIR} \
+    -prefix ${QT_PREFIX} \
     -opensource \
     -confirm-license \
     -nomake examples \
@@ -67,9 +75,9 @@ RUN mkdir -p /opt/qt-src && \
 RUN rm /opt/qt-src/qt-everywhere-opensource-src-${QT_VERSION_FULL}.tar.xz
 
 # Add Qt to PATH
-ENV PATH=$QT_DIR/bin:$PATH
-ENV PATH="${QT_DIR}/${QT_VERSION_FULL}/android_armv7/bin/:${PATH}"
-ENV QT_DIR=${QT_DIR}
+ENV PATH=${QT_PREFIX}/bin:$PATH
+ENV PATH="${QT_PREFIX}/${QT_VERSION_FULL}/android_armv7/bin/:${PATH}"
+ENV QT_DIR=${QT_PREFIX}
 
 # Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
